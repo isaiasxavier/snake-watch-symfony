@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bot Output{% endblock %}
+
+{% block body %}
+    <div class="flex justify-center items-center">
+        <h1 class="text-4xl text-center text-red-500 font-bold underline mt-8 mb-4">Transactions</h1>
+    </div>
+    <div id="bot-output" class="space-y-4"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function fetchBotOutput() {
+                $.ajax({
+                    url: "{{ path('app_bot_output') }}",
+                    method: 'GET',
+                    success: function (data) {
+                        const outputDiv = $('#bot-output');
+                        outputDiv.empty();
+                        data.forEach(item => {
+                            const transactionDiv = $('<div class="bg-black text-white p-4 rounded-lg shadow-md mx-auto w-1/2"></div>');
+                            const [timestamp, ...message] = item.split(' ');
+                            const formattedTimestamp = moment(timestamp).format('MMMM Do YYYY, h:mm:ss a');
+                            transactionDiv.append(`<div class="font-bold text-white">${formattedTimestamp}</div>`);
+                            transactionDiv.append(`<div class="mt-2 text-white">${message.join(' ')}</div>`);
+                            outputDiv.prepend(transactionDiv);
+                        });
+                    }
+                });
+            }
+
+            fetchBotOutput();
+            setInterval(fetchBotOutput, 5000);
+        });
+    </script>
+{% endblock %}

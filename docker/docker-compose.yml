@@ -1,0 +1,86 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: snake-watch-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ../public:/var/www/html/public
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - bot
+    networks:
+      - snake_watch
+
+  php:
+    build:
+      context: ./php
+    image: symfony-environment-php:8.3.10
+    container_name: snake-watch-nginx-php
+    working_dir: /var/www/html
+    volumes:
+      - ../public:/var/www/html/public
+      - ../vendor:/var/www/html/vendor
+      - ../src:/var/www/html/src
+      - ../config:/var/www/html/config
+      - ../.env:/var/www/html/.env
+      - ../templates:/var/www/html/templates
+      - ../assets:/var/www/html/assets
+      - ../importmap.php:/var/www/html/importmap.php
+      - ../public/build:/var/www/html/public/build
+      - ../package.json:/var/www/html/package.json
+      - ../package-lock.json:/var/www/html/package-lock.json
+      - ../node_modules:/var/www/html/node_modules
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: teste_symfony
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    networks:
+      - snake_watch
+    command: [ "sh", "-c", "ls -l /var/www/html && php-fpm" ]
+
+  mysql:
+    image: mysql:latest
+    container_name: snake-watch-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: teste_symfony
+    networks:
+      - snake_watch
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: snake-watch-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - snake_watch
+
+  bot:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: snake-watch-bot
+    working_dir: /usr/src/app
+    volumes:
+      - ../:/usr/src/app
+      - /usr/src/app/node_modules
+    command: [ "node", "snake-watch/bot.mjs" ]
+    networks:
+      - snake_watch
+    ports:
+      - "3000:3000"
+
+networks:
+  snake_watch:
+    name: docker_snake_watch
