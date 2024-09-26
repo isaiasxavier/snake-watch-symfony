@@ -137,7 +137,12 @@ const maybeUrl = address => {
     return explorer ? url(explorer, address) : short(address);
 }
 export const icon = address => currencies[0]?.symbol === 'HDX' ? emojify(address) : `🐍`;
-export const formatAccount = (address, whale) => (whale ? '🐋' : icon(address)) + `${maybeUrl(address)}`;
+
+//returning wallet abreviada
+//export const formatAccount = (address, whale) => (whale ? '🐋' : icon(address)) + `${maybeUrl(address)}`;
+
+//returning full address of wallet
+export const formatAccount = (address, whale) => (whale ? '🐋' : icon(address)) + `${address}`;
 
 export function formatAmount(amount, currency) {
     if (!currency) {

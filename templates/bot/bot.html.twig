@@ -9,6 +9,71 @@
     <div id="bot-output" class="space-y-4"></div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    {# <script>
+        $(document).ready(function () {
+            function fetchBotOutput() {
+                $.ajax({
+                    url: "{{ path('app_bot_output') }}",
+                    method: 'GET',
+                    success: function (data) {
+                        const outputDiv = $('#bot-output');
+                        outputDiv.empty();
+                        data.forEach(item => {
+                            try {
+                                const transactionDiv = $('<div class="bg-gray text-white p-4 rounded-lg shadow-md mx-auto w-1/2"></div>');
+                                const [timestamp, ...messageParts] = item.split(' ');
+                                const formattedTimestamp = moment(timestamp).format('MMMM Do YYYY, h:mm:ss a');
+                                const timestampDiv = $('<div class="font-bold text-white bg-black p-2 rounded text-center mb-2"></div>').text(formattedTimestamp);
+
+                                // Extract wallet part and message part
+                                const walletPartEndIndex = messageParts.findIndex(part => part.includes('</a>')) + 1;
+                                const walletPart = messageParts.slice(0, walletPartEndIndex).join(' ');
+
+                                // Extract swapped amount (e.g., "20.000000 DOT")
+                                const swappedAmountMatch = messageParts.slice(walletPartEndIndex).join(' ').match(/\*\*(.*?)\*\*/);
+                                const swappedAmount = swappedAmountMatch ? swappedAmountMatch[1] : 'N/A';
+
+                                // Extract swapped for amount (e.g., "10 CFG")
+                                const swappedForAmountMatch = messageParts.slice(walletPartEndIndex).join(' ').match(/for \*\*(.*?)\*\*/);
+                                const swappedForAmount = swappedForAmountMatch ? swappedForAmountMatch[1] : 'N/A';
+
+                                // Create wallet div
+                                const walletDiv = $('<div class="bg-red-500 text-white px-2 py-1 rounded mb-2"></div>').html(walletPart);
+
+                                // Create swapped div with black background
+                                const swappedDiv = $('<div class="text-center font-bold mt-2 bg-black text-white p-2 rounded"></div>').text('SWAPPED');
+
+                                // Create swapped amount div
+                                const swappedAmountDiv = $('<div class="text-center font-bold mt-2 bg-blue-500 text-white p-2 rounded"></div>').text(swappedAmount);
+
+                                // Create swapped div with black background
+                                const forDiv = $('<div class="text-center font-bold mt-2 bg-black text-white p-2 rounded"></div>').text('FOR');
+
+                                // Create swapped for amount div
+                                const swappedForAmountDiv = $('<div class="text-center font-bold mt-2 bg-blue-500 text-white p-2 rounded"></div>').text(swappedForAmount);
+
+                                transactionDiv.append(timestampDiv);
+                                transactionDiv.append(walletDiv);
+                                transactionDiv.append(swappedDiv);
+                                transactionDiv.append(swappedAmountDiv);
+                                transactionDiv.append(forDiv);
+                                transactionDiv.append(swappedForAmountDiv);
+                                outputDiv.prepend(transactionDiv);
+                            } catch (error) {
+                                console.error('Error processing item:', item, error);
+                            }
+                        });
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error('AJAX request failed:', textStatus, errorThrown);
+                    }
+                });
+            }
+
+            fetchBotOutput();
+            setInterval(fetchBotOutput, 5000);
+        });
+    </script> #}
     <script>
         $(document).ready(function () {
             function fetchBotOutput() {
@@ -19,13 +84,33 @@
                         const outputDiv = $('#bot-output');
                         outputDiv.empty();
                         data.forEach(item => {
-                            const transactionDiv = $('<div class="bg-black text-white p-4 rounded-lg shadow-md mx-auto w-1/2"></div>');
-                            const [timestamp, ...message] = item.split(' ');
-                            const formattedTimestamp = moment(timestamp).format('MMMM Do YYYY, h:mm:ss a');
-                            transactionDiv.append(`<div class="font-bold text-white">${formattedTimestamp}</div>`);
-                            transactionDiv.append(`<div class="mt-2 text-white">${message.join(' ')}</div>`);
-                            outputDiv.prepend(transactionDiv);
+                            try {
+                                const transactionDiv = $('<div class="bg-black text-white p-4 rounded-lg shadow-md mx-auto w-1/2"></div>');
+                                const [timestamp, ...messageParts] = item.split(' ');
+                                const formattedTimestamp = moment(timestamp).format('MMMM Do YYYY, h:mm:ss a');
+                                const timestampDiv = $('<div class="font-bold text-white bg-black p-2 rounded text-center mb-2"></div>').text(formattedTimestamp);
+
+                                // Extract wallet part and message part
+                                const walletPartEndIndex = messageParts.findIndex(part => part.includes('</a>')) + 1;
+                                const walletPart = messageParts.slice(0, walletPartEndIndex).join(' ');
+
+                                // Create wallet div
+                                const walletDiv = $('<div class="bg-red-500 text-white px-2 py-1 rounded mb-2"></div>').html(walletPart);
+
+                                // Remove wallet part from message parts
+                                const messageWithoutWallet = messageParts.slice(walletPartEndIndex).join(' ');
+
+                                transactionDiv.append(timestampDiv);
+                                transactionDiv.append(walletDiv);
+                                transactionDiv.append(`<div class="mt-2 text-white">${messageWithoutWallet}</div>`);
+                                outputDiv.prepend(transactionDiv);
+                            } catch (error) {
+                                console.error('Error processing item:', item, error);
+                            }
                         });
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error('AJAX request failed:', textStatus, errorThrown);
                     }
                 });
             }
