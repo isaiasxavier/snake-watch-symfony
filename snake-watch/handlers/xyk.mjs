@@ -63,6 +63,27 @@ const assetHubSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="33.6" height
     <path d="M27.594 9.156a3.518 3.518 0 1 1-7.035.004 3.518 3.518 0 0 1 7.035-.004zm0 0M27.594 38.781a3.518 3.518 0 1 1-7.035.004 3.518 3.518 0 0 1 7.035-.004zm0 0M14.602 16.2a3.517 3.517 0 1 1-7.036 0 3.517 3.517 0 0 1 3.52-3.516 3.516 3.516 0 0 1 3.516 3.515zm0 0M40.59 16.2a3.517 3.517 0 1 1-7.035 0 3.517 3.517 0 0 1 3.52-3.516 3.516 3.516 0 0 1 3.515 3.515zm0 0M14.602 31.86a3.52 3.52 0 0 1-3.516 3.519 3.517 3.517 0 1 1 0-7.035 3.516 3.516 0 0 1 3.516 3.515zm0 0M40.59 31.86a3.52 3.52 0 0 1-3.516 3.519 3.517 3.517 0 1 1 0-7.035 3.516 3.516 0 0 1 3.516 3.515zm0 0" fill="#e6007a"/>
   </g>
 </svg>`
+const dotSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 48 48" fill="none" preserveAspectRatio="xMidYMid meet">
+  <g clip-path="url(#clip0_1300_1078)">
+    <path d="M0 14C0 6.268 6.268 0 14 0h20c7.732 0 14 6.268 14 14v20c0 7.732-6.268 14-14 14H14C6.268 48 0 41.732 0 34V14z" fill="url(#paint0_linear_1300_1078)"/>
+    <g clip-path="url(#clip1_1300_1078)" fill="#fff">
+      <path d="M23.997 13.841c3.487 0 6.315-1.643 6.315-3.67 0-2.028-2.828-3.671-6.315-3.671-3.488 0-6.315 1.643-6.315 3.67 0 2.028 2.827 3.671 6.315 3.671zM23.997 41.498c3.487 0 6.315-1.644 6.315-3.671s-2.828-3.67-6.315-3.67c-3.488 0-6.315 1.643-6.315 3.67s2.827 3.67 6.315 3.67zM15.196 18.922c1.744-3.019 1.733-6.288-.025-7.302-1.758-1.014-4.596.61-6.34 3.629-1.744 3.018-1.733 6.287.025 7.302 1.758 1.014 4.597-.61 6.34-3.63zM39.16 32.748c1.744-3.018 1.733-6.287-.023-7.3-1.757-1.014-4.595.611-6.338 3.63-1.744 3.018-1.734 6.287.023 7.3 1.756 1.014 4.594-.611 6.338-3.63zM15.172 36.378c1.758-1.014 1.769-4.284.025-7.302-1.744-3.019-4.582-4.643-6.34-3.629-1.758 1.014-1.77 4.283-.025 7.302 1.743 3.018 4.582 4.643 6.34 3.629zM39.138 22.552c1.757-1.014 1.767-4.283.023-7.301s-4.581-4.644-6.338-3.63c-1.756 1.013-1.767 4.282-.023 7.3 1.744 3.019 4.582 4.644 6.338 3.63z"/>
+    </g>
+  </g>
+  <defs>
+    <linearGradient id="paint0_linear_1300_1078" x1="48" y1="48" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D43079"/>
+      <stop offset="1" stop-color="#F93C90"/>
+    </linearGradient>
+    <clipPath id="clip0_1300_1078">
+      <rect width="48" height="48" rx="24" fill="#fff"/>
+    </clipPath>
+    <clipPath id="clip1_1300_1078">
+      <path fill="#fff" transform="translate(7.532 6.5)" d="M0 0h32.935v35H0z"/>
+    </clipPath>
+  </defs>
+</svg>`;
 
 export async function swapHandler({who, assetIn, assetOut, amountIn, amountOut}, action = `swapped`) {
     if (!assetIn || !assetOut) {
@@ -91,43 +112,31 @@ export async function swapHandler({who, assetIn, assetOut, amountIn, amountOut},
     const formattedUsdValue = formatUsdValue(value);
     const formattedSoldValueInUsd = formatUsdValue(soldValueInUsd);
 
-    const soldPoolDescription = (currencyIn.symbol === '4-Pool' || currencyIn.symbol === '2-Pool') ? '' : '';
-    const boughtPoolDescription = (currencyOut.symbol === '4-Pool' || currencyOut.symbol === '2-Pool') ? '' : '';
-    const formattedSoldAmountWithDescription = `${formattedSoldAmount}${soldPoolDescription}`;
-    const formattedBoughtAmountWithDescription = `${formattedBoughtAmount}${boughtPoolDescription}`;
-
-    const usdtValue = value ? ` ~ ${Math.round(value)} USDT` : '';
-
     const accountLink = `https://hydradx.subscan.io/account/${who}`;
     const formattedAccount = `<a href="${accountLink}" target="_blank"><span class="bg-red-500 text-white px-2 py-1 rounded">Wallet: ${formatAccount(who, isWhale(value))}</span></a>`;
 
-    let message = `${formattedAccount} ${action} **${formattedSoldAmountWithDescription}** for **${formattedBoughtAmountWithDescription}**${usdtValue}`;
-
-    // Se algum dos ativos for da "2-Pool", as imagens serão adicionadas ao texto
-    if (currencyIn.symbol === '2-Pool' || currencyOut.symbol === '2-Pool') {
-        const images = `
-    <span style="position: relative; display: inline-flex; align-items: center;">
-        <span style="position: relative;">
+    // Adiciona SVGs aos valores correspondentes
+    const soldSvg = currencyIn.symbol === 'DOT' ? dotSvg : '';
+    const boughtSvg = currencyOut.symbol === '2-Pool' ? `
+    <span style="position: relative; display: inline-flex; align-items: center; vertical-align: middle;">
+        <span style="position: relative; vertical-align: middle;">
             ${tetherSvg}
-            <span style="position: absolute; top: -5px; right: -5px;">
+            <span style="position: absolute; top: -5px; right: -5px; vertical-align: middle;">
                 ${assetHubSvg}
             </span>
         </span>
-        <span style="position: relative;">
+        <span style="position: relative; vertical-align: middle;">
             ${usdcSvg}
-            <span style="position: absolute; top: -5px; right: -5px;">
+            <span style="position: absolute; top: -5px; right: -5px; vertical-align: middle;">
                 ${assetHubSvg}
             </span>
         </span>
-    </span>`;
+    </span>` : '';
 
-        if (currencyIn.symbol === '2-Pool') {
-            message = `${formattedAccount} ${action} ${formattedSoldAmountWithDescription} ${images} for ${formattedBoughtAmountWithDescription}${usdtValue}`;
-        } else {
-            message = `${formattedAccount} ${action} ${formattedSoldAmountWithDescription} for ${formattedBoughtAmountWithDescription} ${images}${usdtValue}`;
-        }
-    }
+    const formattedSoldAmountWithSvg = `<span style="display: inline-flex; align-items: center; vertical-align: middle;">${formattedSoldAmount} ${soldSvg}</span>`;
+    const formattedBoughtAmountWithSvg = `${formattedBoughtAmount} ${boughtSvg}`;
 
+    let message = `${formattedAccount} ${action} ${formattedSoldAmountWithSvg} FOR ${formattedBoughtAmountWithSvg}${formattedUsdValue}`;
 
     addBotOutput(message);
 }
